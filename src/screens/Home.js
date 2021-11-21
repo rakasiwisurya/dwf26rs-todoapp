@@ -13,6 +13,8 @@ import {
 import { Keyboard } from "react-native";
 import { ListItem } from "react-native-elements";
 import { API } from "../config/api";
+import moment from "moment";
+import "moment/locale/id";
 
 export default function Home({ navigation }) {
   //Init State
@@ -70,6 +72,8 @@ export default function Home({ navigation }) {
 
   // Create Component List
   const renderTodo = ({ item }) => {
+    moment.locale("id");
+
     return (
       <ListItem
         onPress={() => {
@@ -82,6 +86,9 @@ export default function Home({ navigation }) {
           <ListItem.Title style={{ color: theme.colors.primary[500] }}>
             {item.title}
           </ListItem.Title>
+          <ListItem.Subtitle>
+            {moment(item.createdAt).format("LLLL")}
+          </ListItem.Subtitle>
         </ListItem.Content>
       </ListItem>
     );
@@ -121,7 +128,7 @@ export default function Home({ navigation }) {
       </Text>
 
       <FlatList
-        data={todos}
+        data={todos.sort((a, b) => b.id - a.id)}
         renderItem={renderTodo}
         refreshing={isLoading}
         onRefresh={getTodos}
