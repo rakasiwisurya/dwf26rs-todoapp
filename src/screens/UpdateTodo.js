@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Box, Text, VStack, Input, TextArea, Button } from "native-base";
+import { showMessage } from "react-native-flash-message";
 import { API } from "../config/api";
 
 export default function UpdateTodo({ route, navigation }) {
@@ -24,10 +25,16 @@ export default function UpdateTodo({ route, navigation }) {
 
       getTodos();
       getDetailTodo();
-      alert("Update success");
+      showMessage({
+        message: "Successfully Update",
+        type: "success",
+      });
       navigation.goBack();
     } catch (error) {
-      alert(error);
+      showMessage({
+        message: error,
+        type: "danger",
+      });
     }
   };
 

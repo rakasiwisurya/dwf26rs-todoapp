@@ -4,14 +4,15 @@ import {
   Button,
   Divider,
   FlatList,
-  Input,
+  HStack,
   Text,
-  TextArea,
   useTheme,
   VStack,
 } from "native-base";
-import { Keyboard } from "react-native";
-import { ListItem } from "react-native-elements";
+import { TouchableOpacity } from "react-native";
+import { ListItem, SearchBar } from "react-native-elements";
+import { showMessage } from "react-native-flash-message";
+import FontAwesome5 from "react-native-vector-icons/FontAwesome5";
 import { API } from "../config/api";
 import moment from "moment";
 import "moment/locale/id";
@@ -20,10 +21,7 @@ export default function Home({ navigation }) {
   //Init State
   const [isLoading, setIsLoading] = useState(false);
   const [todos, setTodos] = useState([]);
-  const [newTodo, setNewTodo] = useState({
-    title: "",
-    description: "",
-  });
+  const [search, setSearch] = useState("");
 
   // Create LifeCycle
   useEffect(() => {
@@ -43,7 +41,11 @@ export default function Home({ navigation }) {
     }
   };
 
-  const postTodo = async () => {
+  const handleSearch = (value) => {
+    setSearch(value);
+  };
+
+  const handleDone = async (id) => {
     try {
       const config = {
         headers: {
@@ -51,20 +53,21 @@ export default function Home({ navigation }) {
         },
       };
 
-      const data = JSON.stringify(newTodo);
+      let data;
+      for (const todo of todos) {
+        if (todo.id === id) {
+          data = JSON.stringify({ ...todo, status: !todo.status });
+        }
+      }
 
-      API.post("/todos", data, config);
+      await API.put(`/todos/${id}`, data, config);
 
-      Keyboard.dismiss();
-      alert("Todo successfully added");
       getTodos();
-
-      setNewTodo({
-        title: "",
-        description: "",
-      });
     } catch (error) {
-      alert(error);
+      showMessage({
+        message: error,
+        type: "danger",
+      });
     }
   };
 
@@ -80,45 +83,52 @@ export default function Home({ navigation }) {
           navigation.navigate("DetailTodo", { ...item, getTodos: getTodos });
         }}
         key={`todos-${item.id}`}
-        bottomDivider
+        topDivider
       >
         <ListItem.Content>
-          <ListItem.Title style={{ color: theme.colors.primary[500] }}>
-            {item.title}
-          </ListItem.Title>
-          <ListItem.Subtitle>
-            {moment(item.createdAt).format("LLLL")}
-          </ListItem.Subtitle>
+          <HStack space={2}>
+            <Box flex={7}>
+              <ListItem.Title style={{ color: theme.colors.primary[500] }}>
+                {item.title}
+              </ListItem.Title>
+              <ListItem.Subtitle>
+                {moment(item.createdAt).format("LLL")}
+              </ListItem.Subtitle>
+            </Box>
+            <Box flex={1} justifyContent="center">
+              <TouchableOpacity
+                onPress={() => {
+                  handleDone(item.id);
+                }}
+              >
+                <FontAwesome5
+                  size={23}
+                  name={item.status ? "check-circle" : "circle"}
+                  style={{ color: theme.colors.primary[500] }}
+                  brand
+                />
+              </TouchableOpacity>
+            </Box>
+          </HStack>
         </ListItem.Content>
       </ListItem>
     );
   };
 
   return (
-    <Box p={5}>
+    <Box m={5}>
       <VStack space={3}>
         <Text fontSize="lg" color="primary.500">
           Add New Todo
         </Text>
-        <Input
-          borderColor="primary.500"
-          color="primary.500"
-          placeholder="Title"
-          value={newTodo.title}
-          onChangeText={(value) => {
-            setNewTodo((prevState) => ({ ...prevState, title: value }));
+
+        <Button
+          onPress={() => {
+            navigation.navigate("AddTodo", { getTodos });
           }}
-        />
-        <TextArea
-          borderColor="primary.500"
-          color="primary.500"
-          placeholder="Description"
-          value={newTodo.description}
-          onChangeText={(value) => {
-            setNewTodo((prevState) => ({ ...prevState, description: value }));
-          }}
-        />
-        <Button onPress={postTodo}>Submit</Button>
+        >
+          Add Todo
+        </Button>
       </VStack>
 
       <Divider bg="primary.500" my={5} />
@@ -127,13 +137,32 @@ export default function Home({ navigation }) {
         Todo List
       </Text>
 
+      <SearchBar
+        placeholder="type here..."
+        onChangeText={(value) => {
+          handleSearch(value);
+        }}
+        value={search}
+        cancelIcon={false}
+        platform="android"
+        style={{
+          color: theme.colors.coolGray[400],
+        }}
+      />
+
       <FlatList
-        data={todos.sort((a, b) => b.id - a.id)}
+        data={todos
+          .sort((a, b) => b.id - a.id)
+          .filter((item) => {
+            if (item.title.toLowerCase().includes(search.toLowerCase())) {
+              return item;
+            }
+          })}
         renderItem={renderTodo}
         refreshing={isLoading}
         onRefresh={getTodos}
         nestedScrollEnabled
-        height={220}
+        height={300}
       />
     </Box>
   );

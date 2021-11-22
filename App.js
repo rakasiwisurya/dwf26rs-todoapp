@@ -1,5 +1,6 @@
 import React from "react";
 import { StatusBar } from "expo-status-bar";
+import FlashMessage from "react-native-flash-message";
 import "react-native-gesture-handler";
 
 // Import 'NativeBaseProvider' component
@@ -73,6 +74,19 @@ export default function App() {
       <NativeBaseProvider theme={theme}>
         <StatusBar style="light" />
         <Container />
+        <FlashMessage
+          style={{
+            position: "absolute",
+            top: 50,
+            alignItems: "center",
+            paddingVertical: 10,
+          }}
+          titleStyle={{ fontSize: 18, textAlign: "center" }}
+          position="center"
+          useRef="myLocalFlashMessage"
+          icon="auto"
+          duration={500}
+        />
       </NativeBaseProvider>
     );
   }

@@ -11,6 +11,7 @@ import { useTheme } from "native-base";
 
 // Import Screen
 import Home from "./src/screens/Home";
+import AddTodo from "./src/screens/AddTodo";
 import DetailTodo from "./src/screens/DetailTodo";
 import UpdateTodo from "./src/screens/UpdateTodo";
 
@@ -35,6 +36,13 @@ export default function Container() {
           component={Home}
           options={{
             title: "Todo App",
+          }}
+        />
+        <Stack.Screen
+          name="AddTodo"
+          component={AddTodo}
+          options={{
+            title: "Add Todo",
           }}
         />
         <Stack.Screen

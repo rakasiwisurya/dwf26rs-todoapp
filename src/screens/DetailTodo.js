@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { ScrollView, Box, Text, Button, HStack, VStack } from "native-base";
 import { Alert } from "react-native";
+import { showMessage } from "react-native-flash-message";
 import { API } from "../config/api";
 import moment from "moment";
 import "moment/locale/id";
@@ -38,7 +39,11 @@ export default function DetailTodo({ route, navigation }) {
           text: "Yes",
           onPress: async () => {
             await API.delete(`/todos/${id}`);
-            alert("Delete Success");
+            // alert("Delete Success");
+            showMessage({
+              message: "Successfully delete",
+              type: "danger",
+            });
             getTodos();
             navigation.goBack();
           },
@@ -48,7 +53,10 @@ export default function DetailTodo({ route, navigation }) {
         },
       ]);
     } catch (error) {
-      alert(error);
+      showMessage({
+        message: error,
+        type: "danger",
+      });
     }
   };
 
